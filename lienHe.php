@@ -1,6 +1,48 @@
 <?php
 require("header.php");
 ?>
+<?php
+
+require("db.php"); // Kết nối cơ sở dữ liệu
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Lấy dữ liệu từ form
+    $name = htmlspecialchars($_POST['name'] ?? '');
+    $email = htmlspecialchars($_POST['email'] ?? '');
+    $message = htmlspecialchars($_POST['message'] ?? '');
+
+    // Kiểm tra dữ liệu nhập
+    if (!empty($name) && !empty($email) && !empty($message)) {
+        // Sử dụng MySQLi với Prepared Statements
+        $sql = "INSERT INTO lienhe (HoTen, email, NoiDung) VALUES (?, ?, ?)";
+        $stmt = $connection->prepare($sql);
+
+        if ($stmt) {
+            // Gắn dữ liệu vào câu lệnh
+            $stmt->bind_param("sss", $name, $email, $message);
+
+            // Thực thi câu lệnh
+            if ($stmt->execute()) {
+                echo "<p style='color: green; text-align: center;'>Gửi liên hệ thành công!</p>";
+            } else {
+                echo "<p style='color: red; text-align: center;'>Lỗi khi gửi liên hệ: " . $stmt->error . "</p>";
+            }
+
+            // Đóng statement
+            $stmt->close();
+        } else {
+            echo "<p style='color: red; text-align: center;'>Lỗi chuẩn bị câu lệnh: " . $connection->error . "</p>";
+        }
+    } else {
+        echo "<p style='color: red; text-align: center;'>Vui lòng điền đầy đủ thông tin.</p>";
+    }
+}
+
+// Đóng kết nối
+$connection->close();
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
